@@ -54,7 +54,7 @@ def graph_init():
 today = datetime.now()
 date_format = today.strftime("%Y_%m_%d")
 hour_min = today.strftime("%H:%S")
-journal_title = (f"Journal_{date_format}")
+journal_title = f"Journal_{date_format}"
 
 
 def rich_init():
