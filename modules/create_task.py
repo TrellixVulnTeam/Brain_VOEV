@@ -14,7 +14,7 @@ def main(log, graph, journal_title, date_format, hour_min):
     name2 = f"{taskname} (id: {id_number})"
 
     graph.run(f"MATCH (n: Task) WHERE n.name = '{taskname}' SET n.name = '{name2}'", taskname=taskname, id_number=id_number)
-    graph.run(f"MATCH (a: Task), (b: Task_master) WHERE a.name = '{taskname}' CREATE (a)-[r: Task]->(b)")
+    graph.run(f"MATCH (a: Task), (b: Task_master) WHERE a.name = '{name2}' AND b.name = 'Task_master' CREATE (a)-[r: Task]->(b)", name2=name2)
 
     log.info(name2)
     log.info("Task created")
