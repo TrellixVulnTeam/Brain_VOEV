@@ -16,7 +16,7 @@ from rich.logging import RichHandler
 
 # Modules
 
-from modules import Logger
+from modules import logger
 from modules import view
 from modules import create
 from modules import update
@@ -48,6 +48,7 @@ def graph_init():
         log.info("No Database Found\n")
         log.info("Start Database and press press any key to continue\n")
         input()
+
 
 #  Use YYYY-MM-DD format
 
@@ -121,7 +122,7 @@ if __name__ == "__main__":
     try:
         rich_init()
         graph_init()
-        Logger.init()
+        logger.init()
         BrainAPI.main(log, json, websocket, create_connection, threading)
     except:
         log.info("Init Failed")
