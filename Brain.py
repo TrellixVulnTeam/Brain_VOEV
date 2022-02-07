@@ -24,7 +24,7 @@ from modules import create_task
 from modules import tasks
 from modules import complete_task
 from modules import BrainAPI
-from tasks import attach
+from modules import attach
 
 
 # Varibles
