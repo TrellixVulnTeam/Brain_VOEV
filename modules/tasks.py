@@ -19,14 +19,24 @@ def main(log, graph):
         taskname = task["name"]
 
         relationship = graph.run(f"MATCH (a: Task)-[r]->(b) WHERE a.name = '{taskname}' RETURN type(r)", taskname=taskname).data()
-        relationship = relationship[0]["type(r)"]
+
+        if relationship != []:
+            relationship = relationship[0]["type(r)"]
+        else:
+            relationship = "Task_of"
 
         parent = graph.run(f"MATCH (a: Task)-[r]->(b) WHERE a.name = '{taskname}' RETURN b", taskname=taskname).data()
-        parent = parent[0]["b"]["name"]
+        if parent != []:
+            parent = parent[0]["b"]["name"]
+        else:
+            parent = "Task_master" + "_Branch"
 
         task_branch_name = taskname + "_Branch"
 
-        parent_branch_name = parent + "_Branch"
+        if parent != None:
+            parent_branch_name = parent + "_Branch"
+        else:
+            parent_branch_name = "Task_master" + "_Branch"
 
         if task["completed"] == "False":
 
@@ -34,8 +44,13 @@ def main(log, graph):
                     task_branch_names[parent_branch_name] = parent_branch_name
 
                     grandparent = graph.run(f"MATCH (a)-[r]->(b)-[r2]->(c) WHERE a.name = '{taskname}' RETURN c", taskname=taskname).data()
-                    grandparent = grandparent[0]["c"]["name"]
-                    grandparent_branch_name = grandparent + "_Branch"
+
+                    if grandparent != []:
+                        print(grandparent)
+                        grandparent = grandparent[0]["c"]["name"]
+                        grandparent_branch_name = grandparent + "_Branch"
+                    else:
+                        grandparent_branch_name = "Task_master" + "_Branch"
 
                     task_branch_names[parent_branch_name] = task_branch_names[grandparent_branch_name].add(parent)
 

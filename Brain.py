@@ -25,6 +25,7 @@ from modules import tasks
 from modules import complete_task
 from modules import BrainAPI
 from modules import attach
+from modules.locksley import locksley
 
 
 # Varibles
@@ -103,8 +104,14 @@ def switchboard():
             complete_task.main(log, graph)
         elif user_input == "attach":
             attach.main(log, graph)
-
+        elif user_input == "locksley refresh":
+           start_locksley_thread = threading.Thread(target=start_locksley)
+           start_locksley_thread.start()
     log.info("Program exiting\n")
+
+
+def start_locksley():
+    locksley.refresh(log)
 
 
 def display_titlebar():
