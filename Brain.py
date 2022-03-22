@@ -7,6 +7,7 @@ import websocket
 from websocket import create_connection
 import threading
 
+
 # Import rich
 
 from rich.console import Console
@@ -16,7 +17,7 @@ from rich.logging import RichHandler
 
 # Modules
 
-from modules import Logger
+from modules import logger
 from modules import view
 from modules import create
 from modules import update
@@ -25,36 +26,19 @@ from modules import tasks
 from modules import complete_task
 from modules import BrainAPI
 from modules import attach
-
+from modules import graph_init
 
 # Varibles
 
 global user_input
 user_input = "None"
 
-global log
-log = logging.getLogger("rich")
-
-
-def graph_init():
-
-    global graph
-    uri = "bolt://localhost:7687"
-    user = "neo4j"
-    password = "password"
-    try:
-        graph = Graph(uri, auth=(user, password))
-    except:
-        log.info("No Database Found\n")
-        log.info("Start Database and press press any key to continue\n")
-        input()
-
 #  Use YYYY-MM-DD format
 
 today = datetime.now()
 date_format = today.strftime("%Y_%m_%d")
 hour_min = today.strftime("%H:%S")
-journal_title = (f"Journal_{date_format}")
+journal_title = f"Journal_{date_format}"
 
 
 def rich_init():
@@ -75,6 +59,7 @@ def rich_init():
 
     global log
     log = logging.getLogger("rich")
+    return log
 
 
 def switchboard():
@@ -116,12 +101,10 @@ def display_titlebar():
 
 if __name__ == "__main__":
 
-    log = logging.getLogger("rich")
-
     try:
-        rich_init()
-        graph_init()
-        Logger.init()
+        log = rich_init()
+        user, graph = graph_init.main(log)
+        logger.init()
         BrainAPI.main(log, json, websocket, create_connection, threading)
     except:
         log.info("Init Failed")

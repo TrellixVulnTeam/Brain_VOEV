@@ -15,6 +15,12 @@ def main(log, graph):
     except Exception as e:
         log.info(e)
 
+    try:
+        graph.run(f"MATCH (a: Task)-[r: Task]-(b: Task_master) WHERE id(a) = {subtask} AND b.name = 'Task_master' DELETE r", subtask=subtask)
+    except Exception as e:
+        log.info(e)
+
+
 if __name__ == "__main__":
 
     main()

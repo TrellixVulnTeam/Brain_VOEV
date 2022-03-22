@@ -1,0 +1,9 @@
+django
+django-channels
+Textualize
+logger
+pycrypto
+py2neo
+rich
+websocket
+websocket-client
