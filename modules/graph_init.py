@@ -1,10 +1,9 @@
 import os
 from py2neo import Graph
-import time
 import logging
 
 from modules import new_user
-
+from modules import login
 
 def connect(log):
 
@@ -17,7 +16,7 @@ def connect(log):
         log.info("No Database Found\n")
         log.info("Start Database and press press any key to continue\n")
         input()
-    
+
     return graph
 
 def create_system(log, graph):
@@ -25,30 +24,23 @@ def create_system(log, graph):
 
     log.info("You must create a user profile to continue")
 
-    user = new_user.user(log, graph)
-    
-    username = user.name
-
-    log.info(username)
-
-    graph.run(f"MATCH (m: Main) CREATE (a: user), (b: TaskMaster), (c: JournalMaster) SET a.name = '{username}',  b.name = 'TaskMaster', c.name = 'JournalMaster' CREATE (b)-[r: link]->(a), (c)-[s: link]->(a), (a)-[t: link]->(m)", username=username)
-
-    return user
+    new_user.user(log, graph)
 
 
 def system_init(log, graph):
 
     main = graph.run(f"MATCH (n: Main) WHERE n.name='Main' RETURN (n)").evaluate()
-    time.sleep(1)
-    
+
     if main == None:
         log.info("No data found. Initializing system.")
-        user = create_system(log, graph)
-        return user
+        create_system(log, graph)
     else:
         pass
 
+    username = login.main(log, graph)
+    return username
+
 def main(log):
     graph = connect(log)
-    user = system_init(log, graph)
-    return user, graph
+    username = system_init(log, graph)
+    return username, graph

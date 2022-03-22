@@ -27,6 +27,9 @@ from modules import complete_task
 from modules import BrainAPI
 from modules import attach
 from modules import graph_init
+from modules import login
+
+
 
 # Varibles
 
@@ -62,7 +65,7 @@ def rich_init():
     return log
 
 
-def switchboard():
+def switchboard(username):
 
     global log
     global graph
@@ -74,7 +77,7 @@ def switchboard():
         if user_input == "view":
             view.main(log, graph, journal_title)
         elif user_input == "create":
-            create.main(log, graph, journal_title, date_format)
+            create.main(log, graph, journal_title, date_format, username)
         elif user_input == "query":
             query1()
         elif user_input == "update":
@@ -103,7 +106,7 @@ if __name__ == "__main__":
 
     try:
         log = rich_init()
-        user, graph = graph_init.main(log)
+        username, graph = graph_init.main(log)
         logger.init()
         BrainAPI.main(log, json, websocket, create_connection, threading)
     except:
@@ -115,6 +118,6 @@ if __name__ == "__main__":
     display_titlebar()
 
     try:
-        switchboard()
+        switchboard(username)
     except KeyboardInterrupt:
         log.info("Program exiting\n")
