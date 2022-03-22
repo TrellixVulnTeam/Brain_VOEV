@@ -13,9 +13,11 @@ def main(log, graph):
     else:
         while user == None:
             log.info("Username not found, please try again or contact system administrator")
+
+            log.info("Username?")
             username = input(">>")
 
-            user = graph.run(f"MATCH (u: User) WHERE u.name = '{username}'", username=username).evaluate()
+            user = graph.run(f"MATCH (u: User) WHERE u.name = '{username}' RETURN (u)", username=username).evaluate()
 
     log.info("Password?")
     password = getpass.getpass(">>")

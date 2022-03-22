@@ -1,13 +1,13 @@
-def main(log, graph, journal_title):
+def main(log, graph, journal_title, username):
 
     log.info("Here is your Journal from Today")
 
-    today = graph.run(f"MATCH (n: Journal) where n.name = '{journal_title}' RETURN (n) ", journal_title=journal_title).evaluate()
+    today = graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster) where j.name = '{journal_title}' AND u.name = '{username}' AND J.name = 'JournalMaster' RETURN (j) ", journal_title=journal_title).evaluate()
 
     log.info(today["name"])
     log.info(today["body"])
 
-    mood_chart(graph)
+    mood_chart(graph, log, username, journal_title)
 
 
 def flatten(t):
@@ -24,7 +24,7 @@ def flatten(t):
     return flat_list
 
 
-def mood_chart(graph):
+def mood_chart(graph, log, username, journal_title):
 
     import plotext as plt
     import sys
@@ -33,15 +33,11 @@ def mood_chart(graph):
     current = os.path.dirname(os.path.realpath(__file__))
     parent = os.path.dirname(current)
     sys.path.append(parent)
-    from Brain import log, journal_title
 
-
-    global journal_title
-
-    mood_in =  graph.run(f"MATCH (n: Journal)  RETURN n.mood", journal_title=journal_title)
-    anxiety_in = graph.run(f"MATCH (n: Journal) RETURN (n.anxiety)", journal_title=journal_title)
-    depression_in = graph.run(f"MATCH (n: Journal) RETURN (n.depression)", journal_title=journal_title)
-    energy_in = graph.run(f"MATCH (n: Journal)  RETURN (n.energy)", journal_title=journal_title)
+    mood_in =  graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster) WHERE u.name = '{username}' AND J.name = 'JournalMaster' RETURN j.mood", journal_title=journal_title)
+    anxiety_in = graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster) WHERE u.name = '{username}' AND J.name = 'JournalMaster' RETURN (j.anxiety)", journal_title=journal_title)
+    depression_in = graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster) WHERE u.name = '{username}' AND J.name = 'JournalMaster' RETURN (j.depression)", journal_title=journal_title)
+    energy_in = graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster) WHERE u.name = '{username}' AND J.name = 'JournalMaster' RETURN (j.energy)", journal_title=journal_title)
 
     mood_list = []
     while mood_in.forward():

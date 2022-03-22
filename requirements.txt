@@ -2,6 +2,7 @@ django
 django-channels
 Textualize
 logger
+plotext
 pycrypto
 py2neo
 rich

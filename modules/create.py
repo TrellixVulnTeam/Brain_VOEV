@@ -31,7 +31,7 @@ def main(log, graph, journal_title, date_format, username):
 
         journal_body = ""
         for item in journal:
-            journal_body+=str("\n" + item)
+            journal_body+=str(item)
 
             log.info(journal_body)
 

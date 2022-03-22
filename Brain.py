@@ -75,13 +75,13 @@ def switchboard(username):
         user_input = input(">>")
 
         if user_input == "view":
-            view.main(log, graph, journal_title)
+            view.main(log, graph, journal_title, username)
         elif user_input == "create":
             create.main(log, graph, journal_title, date_format, username)
         elif user_input == "query":
             query1()
         elif user_input == "update":
-            update.main(log, graph, journal_title)
+            update.main(log, graph, journal_title, username)
         elif user_input == "tasks":
             tasks.main(log, graph)
         elif user_input == "create task":
