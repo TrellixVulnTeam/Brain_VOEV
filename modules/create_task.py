@@ -1,20 +1,19 @@
-def main(log, graph, journal_title, date_format, hour_min):
+def main(log, graph, journal_title, date_format, hour_min, username):
 
     taskname_in = input(">> Task name? ")
-    task_datetime = (f"Task {date_format} {hour_min} {taskname_in}")
+    task_datetime = (f"Task {date_format} {hour_min}")
 
     taskname = taskname_in
 
     completed = False
 
-    graph.run(f"CREATE (n: Task) SET n.name = '{taskname}' SET n.task_datetime = '{task_datetime}' SET n.completed = '{completed}' ", task_datetime=task_datetime, taskname=taskname)
+    graph.run(f"MATCH (u: User), (T: TaskMaster) WHERE u.name = '{username}' AND T.name = 'TaskMaster' AND (T)-[*]->(u) CREATE (t: Task), (t)-[r: Task]->(T) SET t.name = '{taskname}', t.task_datetime = '{task_datetime}', t.completed = '{completed}' ", task_datetime=task_datetime, taskname=taskname, completed=completed, username=username)
 
-    id_number = graph.run(f"MATCH (n: Task) WHERE n.name = '{taskname}' RETURN ID (n)", taskname=taskname).evaluate()
+    id_number = graph.run(f"MATCH (t: Task), (u: User), (T: TaskMaster) WHERE u.name = '{username}' AND T.name = 'TaskMaster' AND (t)-[*]->(T)-[*]->(u) AND t.name = '{taskname}' RETURN ID (t)", taskname=taskname).evaluate()
 
     name2 = f"{taskname} (id: {id_number})"
 
-    graph.run(f"MATCH (n: Task) WHERE n.name = '{taskname}' SET n.name = '{name2}'", taskname=taskname, id_number=id_number)
-    graph.run(f"MATCH (a: Task), (b: Task_master) WHERE a.name = '{name2}' AND b.name = 'Task_master' CREATE (a)-[r: Task]->(b)", name2=name2)
+    graph.run(f"MATCH (t: Task), (u: User), (T: Taskmaster) WHERE u.name = '{username}' AND (t)-[*]->(T)-[*]->(u) AND t.name = '{taskname}' SET t.name = '{name2}', t.id = '{id_number}'", taskname=taskname, id_number=id_number, name2=name2)
 
     log.info(name2)
     log.info("Task created")

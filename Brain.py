@@ -83,9 +83,9 @@ def switchboard(username):
         elif user_input == "update":
             update.main(log, graph, journal_title, username)
         elif user_input == "tasks":
-            tasks.main(log, graph)
+            tasks.main(log, graph, username)
         elif user_input == "create task":
-            create_task.main(log, graph, journal_title, date_format, hour_min)
+            create_task.main(log, graph, journal_title, date_format, hour_min, username)
         elif user_input == "complete task":
             complete_task.main(log, graph)
         elif user_input == "attach":
