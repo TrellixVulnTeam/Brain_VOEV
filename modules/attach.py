@@ -2,7 +2,7 @@ from rich.tree import Tree
 from rich import print
 
 
-def main(log, graph):
+def main(log, graph, username):
 
     log.info("Subtask to attach? (id)")
     subtask = input(">> ")
@@ -10,15 +10,42 @@ def main(log, graph):
     log.info("Task to attach to? (id)")
     Task = input(">> ")
 
-    try:
-        graph.run(f"MATCH (a: Task), (b: Task) WHERE id(a) = {Task} AND id(b) = {subtask} CREATE (b)-[r: Subtask_of]->(a)")
-    except Exception as e:
-        log.info(e)
+    # Attach node
+    graph.run(f"\
+              MATCH (t: Task),\
+              (t2: Task),\
+              (T: TaskMaster),\
+              (u: User)\
+              \
+              WHERE id(t) = {Task}\
+              AND id(t2) = {subtask}\
+              AND u.name = '{username}'\
+              AND T.name = 'TaskMaster'\
+              AND (T)-[*]->(u)\
+              \
+              CREATE (t2)-[r2: Subtask_of]->(t)\
+              ", Task=Task, subtask=subtask, username=username)
+    # Delete connection
+    graph.run(f"\
+              MATCH (t: Task),\
+              (T: TaskMaster),\
+              (u: User),\
+              (t)-[r]-(T)\
+              \
+              WHERE id(t) = {subtask}\
+              AND u.name = '{username}'\
+              AND T.name = 'TaskMaster'\
+              AND (T)-[*]->(u)\
+              \
+              DELETE r\
+              ", Task=Task, username=username)
 
-    try:
-        graph.run(f"MATCH (a: Task)-[r: Task]-(b: Task_master) WHERE id(a) = {subtask} AND b.name = 'Task_master' DELETE r", subtask=subtask)
-    except Exception as e:
-        log.info(e)
+    # Move node up one layer
+    layer = graph.run(f"MATCH (t: Task) WHERE id(t) = {subtask} RETURN t.layer", subtask=subtask).evaluate()
+
+    layer = int(layer) + 1
+
+    graph.run(f"MATCH (t: Task) WHERE id(t)  = {subtask} SET t.layer = '{layer}'", subtask=subtask, layer=layer)
 
 
 if __name__ == "__main__":

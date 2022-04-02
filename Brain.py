@@ -3,8 +3,6 @@ import datetime
 from datetime import datetime
 from py2neo import Graph
 import json
-import websocket
-from websocket import create_connection
 import threading
 
 
@@ -17,7 +15,6 @@ from rich.logging import RichHandler
 
 # Modules
 
-from modules import logger
 from modules import view
 from modules import create
 from modules import update
@@ -89,7 +86,7 @@ def switchboard(username):
         elif user_input == "complete task":
             complete_task.main(log, graph)
         elif user_input == "attach":
-            attach.main(log, graph)
+            attach.main(log, graph, username)
 
     log.info("Program exiting\n")
 
@@ -107,7 +104,6 @@ if __name__ == "__main__":
     try:
         log = rich_init()
         username, graph = graph_init.main(log)
-        logger.init()
         BrainAPI.main(log, json, websocket, create_connection, threading)
     except:
         log.info("Init Failed")

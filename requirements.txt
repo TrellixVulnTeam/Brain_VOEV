@@ -6,5 +6,4 @@ plotext
 pycrypto
 py2neo
 rich
-websocket
 websocket-client

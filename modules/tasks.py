@@ -8,41 +8,45 @@ def main(log, graph, username):
 
     tasks_in = graph.run(f"MATCH (t: Task), (u: User), (T: TaskMaster) WHERE u.name = '{username}' AND T.name = 'TaskMaster' AND (t)-[*]->(T)-[*]->(u) RETURN t", username=username).data()
 
-    task_tree = Tree("Tasks")
 
-    task_branch_names = {}
-    task_branch_names["Task_master_Branch"] = task_tree
+    task_tree = Tree("Tasks")
+    task_list = {}
 
     for task in tasks_in:
 
         task = task["t"]
         taskname = task["name"]
 
-        relationship = graph.run(f"MATCH (t: Task)-[r]->(T)-[*]->(u), (u: User), (T: TaskMaster) WHERE u.name = '{username}' AND T.name = 'TaskMaster' AND t.name = '{taskname}' RETURN type(r)", taskname=taskname, username=username).data()
-        
-        relationship = relationship[0]["type(r)"]
-
-        parent = graph.run(f"MATCH (t: Task)-[r]->(T)-[*]->(u), (u: User), (T: TaskMaster) WHERE u.name = '{username}' AND T.name = 'TaskMaster' AND t.name = '{taskname}' RETURN t", taskname=taskname, username=username).data()
-        
-        parent = parent[0]["t"]["name"]
-
-        task_branch_name = taskname + "_Branch"
-
-        parent_branch_name = parent + "_Branch"
 
         if task["completed"] == "False":
 
-                if parent_branch_name not in task_branch_names:
-                    task_branch_names[parent_branch_name] = parent_branch_name
+            parent = graph.run(f"MATCH (t: Task)-[*]->(p: Task) WHERE t.name = '{taskname}' RETURN (p)", taskname=taskname).evaluate()
 
-                    grandparent = graph.run(f"MATCH (t)-[r]->(b)-[r2]->(c)-[*]->(T)-[*]->(u) WHERE t.name = '{taskname}' AND T.name = 'TaskMaster' AND u.name = '{username}' RETURN c", taskname=taskname, username=username).data()
 
-                    grandparent = grandparent[0]["c"]["name"]
-                    grandparent_branch_name = grandparent + "_Branch"
+            if parent and (parent != "TaskMaster") and (parent != "") and (parent != username) and (parent != None):
 
-                    task_branch_names[parent_branch_name] = task_branch_names[grandparent_branch_name].add(parent)
+                parent = parent["name"]
 
-                if task_branch_name not in task_branch_names:
-                    task_branch_names[task_branch_name] = task_branch_names[parent_branch_name].add(taskname)
+                if parent not in task_list.values():
+                    task_list[taskname] = parent
 
+                    parent_tree = task_tree.add(parent)
+                    parent_tree.add(taskname)
+            else:
+                parent is None
+
+
+            if parent:
+                if taskname not in task_list.keys():
+                    log.info(taskname)
+                    log.info(str(parent_tree))
+
+                    task_list[taskname] = parent
+                    taskname_tree = parent_tree.add(taskname)
+            elif parent == None:
+                if taskname not in task_list.keys():
+                    task_list[taskname] = parent
+                    taskname_tree = task_tree.add(taskname)
+
+    log.info(task_list)
     print(task_tree)
