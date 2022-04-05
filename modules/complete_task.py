@@ -20,7 +20,6 @@ def main(log, graph, username):
                           ", username=username).evaluate()
 
 
-    log.info(completed)
     if completed == 'True':
 
         graph.run(f"\
