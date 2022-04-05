@@ -10,6 +10,14 @@ def main(log, graph, username):
     log.info("Task to attach to? (id)")
     Task = input(">> ")
 
+    # Delete parent relationship of subtask
+    graph.run(f"\
+              MATCH (t: Task)-[r]->(p)\
+              WHERE id(t) = {subtask}\
+              DELETE r\
+              ",subtask=subtask)
+
+
     # Attach node
     graph.run(f"\
               MATCH (t: Task),\
@@ -25,27 +33,22 @@ def main(log, graph, username):
               \
               CREATE (t2)-[r2: Subtask_of]->(t)\
               ", Task=Task, subtask=subtask, username=username)
-    # Delete connection
-    graph.run(f"\
-              MATCH (t: Task),\
-              (T: TaskMaster),\
-              (u: User),\
-              (t)-[r]-(T)\
-              \
-              WHERE id(t) = {subtask}\
-              AND u.name = '{username}'\
-              AND T.name = 'TaskMaster'\
-              AND (T)-[*]->(u)\
-              \
-              DELETE r\
-              ", Task=Task, username=username)
+
 
     # Move node up one layer
-    layer = graph.run(f"MATCH (t: Task) WHERE id(t) = {subtask} RETURN t.layer", subtask=subtask).evaluate()
+    layer = graph.run(f"\
+                      MATCH (t: Task)\
+                      WHERE id(t) = {subtask}\
+                      RETURN t.layer\
+                      ", subtask=subtask).evaluate()
 
     layer = int(layer) + 1
 
-    graph.run(f"MATCH (t: Task) WHERE id(t)  = {subtask} SET t.layer = '{layer}'", subtask=subtask, layer=layer)
+    graph.run(f"\
+              MATCH (t: Task)\
+              WHERE id(t)  = {subtask}\
+              SET t.layer = '{layer}'\
+              ", subtask=subtask, layer=layer)
 
 
 if __name__ == "__main__":
