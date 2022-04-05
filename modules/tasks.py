@@ -2,44 +2,51 @@ from rich.tree import Tree
 from rich import print
 
 
-def main(log, graph):
+def main(log, graph, username):
 
     log.info("Here are your tasks:\n")
 
-    tasks_in = graph.run("MATCH (n: Task) RETURN n").data()
+    tasks_in = graph.run("\
+                         MATCH (t: Task)\
+                         RETURN t\
+                         ").data()
 
     task_tree = Tree("Tasks")
 
     task_branch_names = {}
-    task_branch_names["Task_master_Branch"] = task_tree
+    task_branch_names["TaskMaster_Branch"] = task_tree
+
 
     for task in tasks_in:
 
-        task = task["n"]
+        task = task["t"]
         taskname = task["name"]
 
-        relationship = graph.run(f"MATCH (a: Task)-[r]->(b) WHERE a.name = '{taskname}' RETURN type(r)", taskname=taskname).data()
-        relationship = relationship[0]["type(r)"]
 
-        parent = graph.run(f"MATCH (a: Task)-[r]->(b) WHERE a.name = '{taskname}' RETURN b", taskname=taskname).data()
-        parent = parent[0]["b"]["name"]
+        parent = graph.run(f"\
+                           MATCH (t: Task)-[r]->(p),\
+                           (u: User)\
+                           WHERE t.name = '{taskname}'\
+                           AND (t)-[*]->(u)\
+                           RETURN p\
+                           ", taskname=taskname).data()
+        parent = parent[0]["p"]["name"]
 
         task_branch_name = taskname + "_Branch"
 
         parent_branch_name = parent + "_Branch"
 
-        if task["completed"] == "False":
 
-                if parent_branch_name not in task_branch_names:
-                    task_branch_names[parent_branch_name] = parent_branch_name
+        if parent_branch_name not in task_branch_names:
+            task_branch_names[parent_branch_name] = parent_branch_name
 
-                    grandparent = graph.run(f"MATCH (a)-[r]->(b)-[r2]->(c) WHERE a.name = '{taskname}' RETURN c", taskname=taskname).data()
-                    grandparent = grandparent[0]["c"]["name"]
-                    grandparent_branch_name = grandparent + "_Branch"
+            grandparent = graph.run(f"MATCH (t)-[r]->(p)-[r2]->(g) WHERE t.name = '{taskname}' RETURN g", taskname=taskname).data()
+            grandparent = grandparent[0]["g"]["name"]
+            grandparent_branch_name = grandparent + "_Branch"
 
-                    task_branch_names[parent_branch_name] = task_branch_names[grandparent_branch_name].add(parent)
+            task_branch_names[parent_branch_name] = task_branch_names[grandparent_branch_name].add(parent)
 
-                if task_branch_name not in task_branch_names:
-                    task_branch_names[task_branch_name] = task_branch_names[parent_branch_name].add(taskname)
+        if task_branch_name not in task_branch_names:
+            task_branch_names[task_branch_name] = task_branch_names[parent_branch_name].add(taskname)
 
     print(task_tree)

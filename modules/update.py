@@ -1,8 +1,16 @@
-def main(log, graph, journal_title):
+def main(log, graph, journal_title, username):
 
     # Get mood cursor from database
 
-    today  =  graph.run(f"MATCH (n: Journal) WHERE n.name = '{journal_title}' RETURN n", journal_title=journal_title).evaluate()
+    today  =  graph.run(f"\
+                        MATCH (u: User),\
+                        (j: Journal),\
+                        (J: JournalMaster)\
+                        WHERE j.name = '{journal_title}'\
+                        AND u.name = '{username}'\
+                        AND (j)-[*]->(J)-[*]->(u)\
+                        RETURN j\
+                        ", journal_title=journal_title).evaluate()
 
     journal_body = today["body"]
     journal_name = today["name"]
@@ -12,9 +20,9 @@ def main(log, graph, journal_title):
     log.info(journal_body)
 
     # Journal = multiline input
-    
+
     journal2 = []
-        
+
     journal = today["body"]
     journal2.append(journal)
     while True:
@@ -83,13 +91,18 @@ def main(log, graph, journal_title):
 
     # Update database with node
 
-    graph.run(f"MATCH (n: Journal) WHERE n.name = '{journal_title}' SET n.body = '{journal_body}'", journal_title=journal_title,  journal_body=journal_body)
-    graph.run(f"MATCH (a: Journal) where a.name = '{journal_title}' SET a.mood = '{mood}'", mood=mood, journal_title=journal_title)
-    graph.run(f"MATCH (a: Journal) where a.name = '{journal_title}' SET a.anxiety = '{anxiety}'", anxiety=anxiety, journal_title=journal_title)
-    graph.run(f"MATCH (a: Journal) where a.name = '{journal_title}' SET a.depression = '{depression}'", depression=depression, journal_title=journal_title)
-    graph.run(f"MATCH (a: Journal) where a.name = '{journal_title}' SET a.energy = '{energy}'", energy=energy, journal_title=journal_title)
-   
-    
+    graph.run(f"\
+              MATCH (u: User),\
+              (j: Journal)\
+              WHERE j.name = '{journal_title}'\
+              SET j.body = '{journal_body}',\
+              j.mood = '{mood}',\
+              j.anxiety = '{anxiety}',\
+              j.depression = '{depression}',\
+              j.energy = '{energy}'\
+              ", journal_title=journal_title,  journal_body=journal_body, mood=mood, anxiety=anxiety, depression=depression, energy=energy)
+
+
 def flatten(t):
 
     flat_list = []
