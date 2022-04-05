@@ -1,6 +1,8 @@
-def main(log, json, websocket, create_connection, threading):
+import websocket
 
-    websocket.enableTrace(False)
+
+def main(log, json, threading):
+
 
     try:
         ws = create_connection('ws://localhost:5000/ws/chat/BrainAPI/')

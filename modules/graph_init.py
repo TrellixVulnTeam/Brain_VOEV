@@ -20,7 +20,10 @@ def connect(log):
     return graph
 
 def create_system(log, graph):
-    graph.run(f"CREATE (n: Main) SET n.name = 'Main'")
+    graph.run(f"\
+              CREATE (n: Main)\
+              SET n.name = 'Main'\
+              ")
 
     log.info("You must create a user profile to continue")
 
@@ -29,7 +32,10 @@ def create_system(log, graph):
 
 def system_init(log, graph):
 
-    main = graph.run(f"MATCH (n: Main) WHERE n.name='Main' RETURN (n)").evaluate()
+    main = graph.run(f"MATCH (n: Main)\
+                     WHERE n.name='Main'\
+                     RETURN (n)\
+                     ").evaluate()
 
     if main == None:
         log.info("No data found. Initializing system.")

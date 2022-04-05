@@ -84,7 +84,7 @@ def switchboard(username):
         elif user_input == "create task":
             create_task.main(log, graph, journal_title, date_format, hour_min, username)
         elif user_input == "complete task":
-            complete_task.main(log, graph)
+            complete_task.main(log, graph, username)
         elif user_input == "attach":
             attach.main(log, graph, username)
 
@@ -104,12 +104,12 @@ if __name__ == "__main__":
     try:
         log = rich_init()
         username, graph = graph_init.main(log)
-        BrainAPI.main(log, json, websocket, create_connection, threading)
+        BrainAPI.main(log, json, threading)
     except:
         log.info("Init Failed")
         console.print_exception()
     else:
-        log.info("Init Succeeded!")
+        log.info("Init Succeeded!\n")
 
     display_titlebar()
 

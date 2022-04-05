@@ -29,12 +29,30 @@ class user():
 
         self.password = pass2
 
-        graph.run(f"MATCH (m: Main) CREATE (u: User), (T: TaskMaster), (J: JournalMaster) SET u.name = '{username}',  T.name = 'TaskMaster', J.name = 'JournalMaster' CREATE (u)-[r: link]->(m), (J)-[s: link]->(u), (T)-[t: link]->(u)", username=username)
+        graph.run(f"MATCH (m: Main)\
+                  CREATE (u: User),\
+                  (T: TaskMaster),\
+                  (J: JournalMaster),\
+                  (TC: TaskCompleted),\
+                  (u)-[r: link]->(m),\
+                  (J)-[s: link]->(u),\
+                  (T)-[t: link]->(u),\
+                  (TC)-[l: link]->(T)\
+                  SET u.name = '{username}',\
+                  T.name = 'TaskMaster',\
+                  J.name = 'JournalMaster',\
+                  TC.name = 'TaskCompleted'\
+                  ", username=username)
 
         user = self.user
         password = self.password
         privileges = self.privileges
 
-        graph.run(f"MATCH (u: User) WHERE u.name = '{user}' SET u.user = '{user}', u.password = '{password}', u.privileges = '{privileges}'", user=user, password=password, privileges=privileges)
+        graph.run(f"MATCH (u: User)\
+                  WHERE u.name = '{user}'\
+                  SET u.user = '{user}',\
+                  u.password = '{password}',\
+                  u.privileges = '{privileges}'\
+                  ", user=user, password=password, privileges=privileges)
 
         log.info("User created")

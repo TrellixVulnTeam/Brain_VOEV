@@ -2,7 +2,15 @@ def main(log, graph, journal_title, username):
 
     # Get mood cursor from database
 
-    today  =  graph.run(f"MATCH (u: User), (j: Journal), (J: JournalMaster) WHERE j.name = '{journal_title}' AND u.name = '{username}' AND (j)-[*]->(J)-[*]->(u) RETURN j", journal_title=journal_title).evaluate()
+    today  =  graph.run(f"\
+                        MATCH (u: User),\
+                        (j: Journal),\
+                        (J: JournalMaster)\
+                        WHERE j.name = '{journal_title}'\
+                        AND u.name = '{username}'\
+                        AND (j)-[*]->(J)-[*]->(u)\
+                        RETURN j\
+                        ", journal_title=journal_title).evaluate()
 
     journal_body = today["body"]
     journal_name = today["name"]
@@ -83,7 +91,16 @@ def main(log, graph, journal_title, username):
 
     # Update database with node
 
-    graph.run(f"MATCH (u: User), (j: Journal) WHERE j.name = '{journal_title}' SET j.body = '{journal_body}', j.mood = '{mood}', j.anxiety = '{anxiety}', j.depression = '{depression}', j.energy = '{energy}'", journal_title=journal_title,  journal_body=journal_body, mood=mood, anxiety=anxiety, depression=depression, energy=energy)
+    graph.run(f"\
+              MATCH (u: User),\
+              (j: Journal)\
+              WHERE j.name = '{journal_title}'\
+              SET j.body = '{journal_body}',\
+              j.mood = '{mood}',\
+              j.anxiety = '{anxiety}',\
+              j.depression = '{depression}',\
+              j.energy = '{energy}'\
+              ", journal_title=journal_title,  journal_body=journal_body, mood=mood, anxiety=anxiety, depression=depression, energy=energy)
 
 
 def flatten(t):
