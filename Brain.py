@@ -3,8 +3,6 @@ import datetime
 from datetime import datetime
 from py2neo import Graph
 import json
-import websocket
-from websocket import create_connection
 import threading
 
 # Import rich
@@ -25,30 +23,15 @@ from modules import tasks
 from modules import complete_task
 from modules import BrainAPI
 from modules import attach
+from modules import graph_init
+from modules import login
+
 
 
 # Varibles
 
 global user_input
 user_input = "None"
-
-global log
-log = logging.getLogger("rich")
-
-
-def graph_init():
-
-    global graph
-    uri = "bolt://localhost:7687"
-    user = "neo4j"
-    password = "password"
-    try:
-        graph = Graph(uri, auth=(user, password))
-    except:
-        log.info("No Database Found\n")
-        log.info("Start Database and press press any key to continue\n")
-        input()
-
 
 #  Use YYYY-MM-DD format
 
@@ -76,9 +59,10 @@ def rich_init():
 
     global log
     log = logging.getLogger("rich")
+    return log
 
 
-def switchboard():
+def switchboard(username):
 
     global log
     global graph
@@ -88,21 +72,21 @@ def switchboard():
         user_input = input(">>")
 
         if user_input == "view":
-            view.main(log, graph, journal_title)
+            view.main(log, graph, journal_title, username)
         elif user_input == "create":
-            create.main(log, graph, journal_title, date_format)
+            create.main(log, graph, journal_title, date_format, username)
         elif user_input == "query":
             query1()
         elif user_input == "update":
-            update.main(log, graph, journal_title)
+            update.main(log, graph, journal_title, username)
         elif user_input == "tasks":
-            tasks.main(log, graph)
+            tasks.main(log, graph, username)
         elif user_input == "create task":
-            create_task.main(log, graph, journal_title, date_format, hour_min)
+            create_task.main(log, graph, journal_title, date_format, hour_min, username)
         elif user_input == "complete task":
-            complete_task.main(log, graph)
+            complete_task.main(log, graph, username)
         elif user_input == "attach":
-            attach.main(log, graph)
+            attach.main(log, graph, username)
 
     log.info("Program exiting\n")
 
@@ -117,22 +101,20 @@ def display_titlebar():
 
 if __name__ == "__main__":
 
-    log = logging.getLogger("rich")
-
     try:
         rich_init()
         graph_init()
         logger.init()
-        BrainAPI.main(log, json, websocket, create_connection, threading)
+        BrainAPI.main(log, json, threading)
     except:
         log.info("Init Failed")
         console.print_exception()
     else:
-        log.info("Init Succeeded!")
+        log.info("Init Succeeded!\n")
 
     display_titlebar()
 
     try:
-        switchboard()
+        switchboard(username)
     except KeyboardInterrupt:
         log.info("Program exiting\n")
