@@ -14,7 +14,6 @@ from rich.logging import RichHandler
 
 # Modules
 
-from modules import logger
 from modules import view
 from modules import create
 from modules import update
@@ -102,9 +101,8 @@ def display_titlebar():
 if __name__ == "__main__":
 
     try:
-        rich_init()
-        graph_init()
-        logger.init()
+        log = rich_init()
+        username, graph = graph_init.main(log)
         BrainAPI.main(log, json, threading)
     except:
         log.info("Init Failed")
