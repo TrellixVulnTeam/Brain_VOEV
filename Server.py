@@ -114,16 +114,27 @@ def irc_server(graph, log):
                 
                 user = user_pass[0]
                 password = user_pass[1]
-                                
+                
                 user_back = graph.run(f"MATCH (u: User) WHERE u.name = '{user}' RETURN (u)", user=user).evaluate()
                 
+                returned_pass = graph.run(f"MATCH (u: User) WHERE u.name = '{user}' RETURN u.password", user=user).evaluate()
+
                 if user_back != None:
-                	CLIENTS[new_client_socket] = user
-                	new_client_socket.send(f"Welcome to the server, {user}\n".encode())
-                	irc_instance.rooms[Chatrooms.DEFAULT_ROOM_NAME].add_new_client_to_chatroom(user, new_client_socket)
+                	if password == returned_pass:
+                	   
+                		CLIENTS[new_client_socket] = user
+                		new_client_socket.send(f"Welcome to the server, {user}\n".encode())
+                		irc_instance.rooms[Chatrooms.DEFAULT_ROOM_NAME].add_new_client_to_chatroom(user, new_client_socket)
+                	else:
+                		new_client_socket.send(f"Password incorrect, please try again or contact system administrator".encode())
+                		new_client_socket.close()
+                		SOCKET_LIST.pop()
+                		
+                		
                 else:
                 	new_client_socket.send(f"Username {user} not found, please try again or contact system administrator".encode())
                 	new_client_socket.close()
+                	SOCKET_LIST.pop()
                 	
 
             # Case where client socket is being read from:
@@ -147,7 +158,7 @@ def irc_server(graph, log):
 
                 # Send the message to the parser to be handled
                 else:
-                    message_parse(irc_instance, notified_socket, CLIENTS[notified_socket], message)
+                    message_parse(irc_instance, notified_socket, user, message)
 
     server_socket.close()  # gracefully exit
 
