@@ -7,6 +7,9 @@ IRC - Client Application
 import socket, select, sys, Server  # TODO remove socket since we do not use it here either
 # from Server import BUFFER_SIZE TODO remove since we likely do not need this
 
+import getpass
+import json
+
 # Import rich
 
 from rich.console import Console
@@ -23,7 +26,7 @@ PORT = 5050
 
 def rich_init():
 
-    install()
+    install(show_locals=True)
 
     global console
     console = Console(record=True)
@@ -43,10 +46,13 @@ def rich_init():
 # Rich Init
 rich_init()
 
-# Graph Init
+# Ask For initial username and password
 
-from modules import graph_init
-username, graph = graph_init.main(log)
+log.info("Username?")
+username = input(">")
+
+log.info("Password?")
+password = getpass.getpass(f"{username}> ")
 
 # Give the user a prompt for input
 def user_input(username):
@@ -64,8 +70,12 @@ def irc_client(username):
     server_socket.connect((host, port))
     log.info(f"Connected to server at {host}:{port}")
 
-    # Send initial message to server with username
-    server_socket.send(username.encode())
+    # Send initial message to server with username and pass
+    
+    user_pass = [username, password]
+    user_pass = json.dumps(user_pass)
+    
+    server_socket.send(user_pass.encode())
 
     # Loop to receive and send messages
     while True:
@@ -112,8 +122,7 @@ class Client:
     
     @classmethod
     def from_input(cls, server_socket):
-        return(log.info("Enter username:"), input(),
-                HOST,
+        return( HOST,
                 PORT,
                 server_socket)
 

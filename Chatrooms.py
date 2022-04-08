@@ -131,7 +131,7 @@ class Chatroom:
         self.client_sockets.remove(client_socket)
         self.client_list.pop(client_socket)
         message = f"{client_name} has left the room.\n"
-        message_broadcast(self, client_name, client_socket, message)
+        message_broadcast(Chatroom, client_name, client_socket, message)
 
     def list_clients_in_room(self):
         return list(self.client_list.values())

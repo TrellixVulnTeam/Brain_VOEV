@@ -14,12 +14,16 @@ from rich.traceback import install
 from rich.logging import RichHandler
 
 import logging
+import os
+import json
+
+from py2neo import Graph
 
 from Commands import message_parse
 
 def rich_init():
 
-    install()
+    install(show_locals=True)
 
     global console
     console = Console(record=True)
@@ -35,9 +39,29 @@ def rich_init():
 
     global log
     log = logging.getLogger("rich")
+    
+    return log
 
 # Rich Init
 rich_init()
+
+def connect(log):
+
+    uri = "bolt://localhost:7687"
+    user = "neo4j"
+    graph_password = os.getenv('BrainDBPassword')
+    try:
+        graph = Graph(uri, auth=(user, graph_password))
+    except:
+        log.info("No Database Found\n")
+        log.info("Start Database and press press any key to continue\n")
+        input()
+        
+    return graph
+        
+# Graph init
+    
+connect(log)
 
 
 # Globals
@@ -52,7 +76,7 @@ default_room = Chatroom(Chatrooms.DEFAULT_ROOM_NAME)    # creates a new default 
 irc_instance.rooms[default_room.name] = default_room  # puts the new default room into the room dictionary
 
 
-def irc_server():
+def irc_server(graph, log):
     # get the host information:
     host = socket.gethostname()
     port = PORT_NUMBER
@@ -69,8 +93,10 @@ def irc_server():
 
     while True:
         # Populate a list of sockets that have been read
-        read_sockets, write_sockets, err_sockets = select.select(SOCKET_LIST, [], [])
-
+        try:
+        	read_sockets, write_sockets, err_sockets = select.select(SOCKET_LIST, [], [])
+        except Exception as e:
+        	log.info(e)
         for notified_socket in read_sockets:
             # Case where the server socket is being read from (i.e. initial client connection):
             # Add the client to the socket list and the client dictionary
@@ -82,10 +108,23 @@ def irc_server():
                 log.info(f"New connection established from {new_client_address}\n")
 
                 # The initial message data will be the username to add to the client dictionary
-                user = new_client_socket.recv(BUFFER_SIZE).decode()
-                CLIENTS[new_client_socket] = user
-                new_client_socket.send(f"Welcome to the server, {user}\n".encode())
-                irc_instance.rooms[Chatrooms.DEFAULT_ROOM_NAME].add_new_client_to_chatroom(user, new_client_socket)
+                user_pass = new_client_socket.recv(BUFFER_SIZE).decode()   
+                
+                user_pass = json.loads(user_pass)
+                
+                user = user_pass[0]
+                password = user_pass[1]
+                                
+                user_back = graph.run(f"MATCH (u: User) WHERE u.name = '{user}' RETURN (u)", user=user).evaluate()
+                
+                if user_back != None:
+                	CLIENTS[new_client_socket] = user
+                	new_client_socket.send(f"Welcome to the server, {user}\n".encode())
+                	irc_instance.rooms[Chatrooms.DEFAULT_ROOM_NAME].add_new_client_to_chatroom(user, new_client_socket)
+                else:
+                	new_client_socket.send(f"Username {user} not found, please try again or contact system administrator".encode())
+                	new_client_socket.close()
+                	
 
             # Case where client socket is being read from:
             # Decode and handle the message
@@ -114,4 +153,6 @@ def irc_server():
 
 
 if __name__ == '__main__':
-    irc_server()
+    log = rich_init()
+    graph = connect(log)
+    irc_server(graph, log)
