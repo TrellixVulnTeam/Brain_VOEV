@@ -1,4 +1,51 @@
 import getpass
+import os
+
+from py2neo import Graph
+
+# Import rich
+
+from rich.console import Console
+from rich.theme import Theme
+from rich.traceback import install
+from rich.logging import RichHandler
+import logging
+
+
+def connect(log):
+
+    uri = "bolt://localhost:7687"
+    user = "neo4j"
+    password = os.getenv('BrainDBPassword')
+    try:
+        graph = Graph(uri, auth=(user, password))
+    except Exception as e:
+    	log.info(e)
+    	log.info("No Database Found\n")
+    	log.info("Start Database and press press any key to continue\n")
+    	input()
+    	
+    return graph
+
+def rich_init():
+
+    install()
+
+    global console
+    console = Console(record=True)
+    custom_theme = Theme({"1": "red"})
+    console = Console(theme=custom_theme)
+
+    logging.basicConfig(
+        level="INFO",
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler(rich_tracebacks=True)]
+    )
+
+    global log
+    log = logging.getLogger("rich")
+
 
 class user():
 
@@ -56,3 +103,8 @@ class user():
                   ", user=user, password=password, privileges=privileges)
 
         log.info("User created")
+        
+if __name__ == "__main__":
+	rich_init()
+	graph = connect(log)
+	user(log, graph)

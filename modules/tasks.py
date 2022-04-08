@@ -1,3 +1,4 @@
+import rich
 from rich.tree import Tree
 from rich import print
 
