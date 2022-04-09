@@ -21,6 +21,9 @@ from py2neo import Graph
 
 from Commands import message_parse
 
+from modules import User
+
+
 def rich_init():
 
     install(show_locals=True)
@@ -58,6 +61,7 @@ def connect(log):
         input()
         
     return graph
+        
         
 # Graph init
     
@@ -105,15 +109,17 @@ def irc_server(graph, log):
 
                 new_client_socket, new_client_address = server_socket.accept()
                 SOCKET_LIST.append(new_client_socket)
-                log.info(f"New connection established from {new_client_address}\n")
+                log.info(f"New connection attempt from {new_client_address}\n")
 
                 # The initial message data will be the username to add to the client dictionary
                 user_pass = new_client_socket.recv(BUFFER_SIZE).decode()   
                 
                 user_pass = json.loads(user_pass)
                 
-                user = user_pass[0]
-                password = user_pass[1]
+                tmp_usr = User.User(user_pass, new_client_address)
+                
+                user = tmp_usr.name
+                password = tmp_usr.password
                 
                 user_back = graph.run(f"MATCH (u: User) WHERE u.name = '{user}' RETURN (u)", user=user).evaluate()
                 

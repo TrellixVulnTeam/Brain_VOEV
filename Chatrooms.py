@@ -39,15 +39,16 @@ rich_init()
 
 # Broadcast a message to the server and to all clients in that room
 def message_broadcast(room, sender_name, sender_socket, message):
-    print(f"{room.name} : {sender_name} > {message}", end='\r')
+    log.info(f"{room.name}:{sender_name}> {message}")
 
     # Send the message to all clients except the one that sent the messaage
     for client_socket in room.client_sockets:
         if client_socket != sender_socket:
             try:
-                client_socket.send(f"{room.name} : {sender_name} > {message}".encode())
+                client_socket.send(f"{room.name}:{sender_name}> {message}".encode())
             except e:
-                print('Failed to send message to client')
+                log.info('Failed to send message to client')
+                log.info(e)
 
 
 # The container that has rooms, which have lists of clients
@@ -131,7 +132,7 @@ class Chatroom:
         self.client_sockets.remove(client_socket)
         self.client_list.pop(client_socket)
         message = f"{client_name} has left the room.\n"
-        message_broadcast(Chatroom, client_name, client_socket, message)
+        message_broadcast(self, client_name, client_socket, message)
 
     def list_clients_in_room(self):
         return list(self.client_list.values())
