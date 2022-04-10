@@ -29,14 +29,6 @@ def main(log, graph, journal_title, sender_name, sender_socket, room):
     journal_body = today["body"]
     journal_name = today["name"]
 
-    send("Here is your journal entry for today")
-    send(journal_name + "\n")
-    send(journal_body)
-    
-    
-    send("return "+"Journal body?")
-    journal_body = sender_socket.recv(BUFFER_SIZE).decode()
-    
 
     #
 
@@ -49,32 +41,36 @@ def main(log, graph, journal_title, sender_name, sender_socket, room):
     anxiety.append(today["anxiety"])
     depression.append(today["depression"])
     energy.append(today["energy"])
+    
+    
+    send(f"\n Here is your journal entry for today\n Journal title: {journal_title}\n Body: {journal_body}\n Mood: {mood}\n Anxiety: {anxiety}\n Depression: {depression}\n Energy: {energy}\n")
+    
+    send("return "+"Journal body?\n")
+    
+    if journal_body == None:
+    	journal_body = ""
 
-    # Flatten list of lists
+    journal_body += (" " + sender_socket.recv(BUFFER_SIZE).decode() + "\n")
 
-    mood = flatten(mood)
-    anxiety = flatten(anxiety)
-    depression = flatten(depression)
-    energy = flatten(energy)
 
     # Get user input
     
     send("Lets add an update to your day")
-    send("On a scale of 1 - 10 how is your;")
+    send("On a scale of 1 - 10 how is your;\n")
         
     send("return "+"Mood?")
-    mood = sender_socket.recv(BUFFER_SIZE).decode()
+    mood.append(sender_socket.recv(BUFFER_SIZE).decode()[0])
         
     send("return "+"Anxiety?")
-    anxiety = sender_socket.recv(BUFFER_SIZE).decode()
+    anxiety.append(sender_socket.recv(BUFFER_SIZE).decode()[0])
         
     send("return "+"Depression?")
-    depression = sender_socket.recv(BUFFER_SIZE).decode()
+    depression.append(sender_socket.recv(BUFFER_SIZE).decode()[0])
         
     send("return " + "Energy")
-    energy = sender_socket.recv(BUFFER_SIZE).decode()
+    energy.append(sender_socket.recv(BUFFER_SIZE).decode()[0])
     
-    send(f"\n Body: {journal_body} Mood: {mood} Anxiety: {anxiety} Depression: {depression} Energy: {energy}")
+    send(f"\n Journal title: {journal_title}\n Body: {journal_body}\n Mood: {mood}\n Anxiety: {anxiety}\n Depression: {depression}\n Energy: {energy}")
     
 
     # Convert dict to string, remove brackets

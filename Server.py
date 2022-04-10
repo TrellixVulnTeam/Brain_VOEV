@@ -134,7 +134,7 @@ def irc_server(graph, log):
                         if password == returned_pass:
                            
                             CLIENTS[new_client_socket] = user
-                            new_client_socket.send(f"Welcome to the server, {user}\n".encode())
+                            new_client_socket.send(f"Welcome to the server, {user}".encode())
                             irc_instance.rooms[Chatrooms.DEFAULT_ROOM_NAME].add_new_client_to_chatroom(user, new_client_socket)
                             
                             # Add new client to their own room

@@ -96,25 +96,26 @@ def irc_client(username):
                     log.info("\rDisconnected from the server")
                     sys.exit()
                 # Erase the current line, then print the received message
-                log.info('\r')
-                sys.stdout.flush()
                 
+
+                if message.split(' ')[1] == "return":
                 
-                if message.split()[0] == "return":
-                	log.info(message.split(' ', 1)[1])
-                	log.info(message)
+                	log.info(message.replace(" return",""))
                 	
                 	return_msg = input("Returning> ")
                 	
-                	server_socket.send(return_msg.encode)
+                	server_socket.send(return_msg.encode())
                 	
                 else:
-                	log.info(message)
+                	if message == "#Daniel:Server> ": 
+                		pass
+                	else:
+                		log.info(message)
                 
 
             # Handle input from user
             else:
-                message = (input(f"{username}> ") + "\n")
+                message = (input(f"{username}> "))
                 server_socket.send(message.encode())
                 
 

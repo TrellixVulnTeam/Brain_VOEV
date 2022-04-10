@@ -17,57 +17,64 @@ def main(log, graph, journal_title, date_format, sender_name, sender_socket, roo
     
     BUFFER_SIZE = 2048
     
-    send("Let's create a new Journal entry")
     is_journal_created_today = graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster), (j: Journal), (j)-[*]->(J)-[r: link]->(u) WHERE j.name = '{journal_title}' AND u.name = '{username}' RETURN j.is_journal_created_today ", journal_title=journal_title, username=username).evaluate()
 
 
     if is_journal_created_today == 1:
-        send("You have already created a journal today, here it is")
 
+        today  =  graph.run(f"\
+                        MATCH (u: User),\
+                        (j: Journal),\
+                        (J: JournalMaster)\
+                        WHERE j.name = '{journal_title}'\
+                        AND u.name = '{username}'\
+                        AND (j)-[*]->(J)-[*]->(u)\
+                        RETURN j\
+                        ", journal_title=journal_title).evaluate()
         
-        journal_body = graph.run(f"\
-                                 MATCH (j: Journal),\
-                                 (u: User),\
-                                 (J: JournalMaster),\
-                                 (j)-[*]->(J)-[r: link]->(u)\
-                                 WHERE j.name = '{journal_title}'\
-                                 AND u.name = '{username}'\
-                                 RETURN j.body\
-                                 ", journal_title=journal_title, username=username).evaluate()
+        journal_body = today["body"]
+        journal_name = today["name"]
 
-        send(journal_title)
-        send(journal_body)
+        mood = today["mood"]
+        anxiety = today["anxiety"]
+        depression = today["depression"]
+        energy = today["energy"]
+
+        send(f"You have already created a journal today, here it is\n Journal title: {journal_title}\n Body: {journal_body}\n Mood: {mood}\n Anxiety: {anxiety}\n Depression: {depression}\n Energy: {energy}\n")
+
 
     elif is_journal_created_today is None:
 
-        graph.run(f"MATCH (u: User), (J: JournalMaster) WHERE u.name = '{username}' CREATE (j: Journal)-[r: Journal_of]->(J) SET j.name = '{journal_title}', j.is_journal_created_today = 1", journal_title=journal_title, username=username)
-        send("Your title is " + date_format)
+        graph.run(f"MATCH (u: User), (J: JournalMaster), (J)-[s: link]->(u) WHERE u.name = '{username}' CREATE (j: Journal)-[r: Journal_of]->(J) SET j.name = '{journal_title}', j.is_journal_created_today = 1", journal_title=journal_title, username=username)
+        
+        
+        send(f"\n Let's create a new Journal entry\n Journal title: {journal_title}\n Journal body?\n")
         
         send("return "+"Journal body?")
         journal_body = sender_socket.recv(BUFFER_SIZE).decode()
 
-        send(journal_body)
+        send(journal_body + "\n")
 
         graph.run(f"MATCH (u: User), (J: JournalMaster), (j: Journal), (j)-[*]->(J)-[r: link]->(u) WHERE u.name = '{username}' AND j.name = '{journal_title}' SET j.name = '{journal_title}', j.body = '{journal_body}' ", journal_title=journal_title, journal_body=journal_body)
 
         # Get user input for dicts
 
         send("Lets add an update to your day")
-        send("On a scale of 1 - 10 how is your;")
+        send("On a scale of 1 - 10 how is your;\n")
         
         send("return "+"Mood?")
-        mood = sender_socket.recv(BUFFER_SIZE).decode()
+        mood = (sender_socket.recv(BUFFER_SIZE).decode())
         
         send("return "+"Anxiety?")
-        anxiety = sender_socket.recv(BUFFER_SIZE).decode()
+        anxiety = (sender_socket.recv(BUFFER_SIZE).decode())
         
         send("return "+"Depression?")
-        depression = sender_socket.recv(BUFFER_SIZE).decode()
+        depression = (sender_socket.recv(BUFFER_SIZE).decode())
         
         send("return " + "Energy")
-        energy = sender_socket.recv(BUFFER_SIZE).decode()
+        energy = (sender_socket.recv(BUFFER_SIZE).decode())
         
-        send(f"\n Body: {journal_body} Mood: {mood} Anxiety: {anxiety} Depression: {depression} Energy: {energy}")
+        send(f"\n Journal Title: {journal_title}\n Body: {journal_body}\n Mood: {mood}\n Anxiety: {anxiety}\n Depression: {depression}\n Energy: {energy}")
 	
         # Convert dict to string, remove brackets
 
@@ -98,4 +105,4 @@ def main(log, graph, journal_title, date_format, sender_name, sender_socket, roo
 
         # Send changes to database
 
-        graph.run(f"MATCH (j: Journal), (J: JournalMaster), (u: User) WHERE j.name = '{journal_title}' AND u.name = '{username}' AND (j)-[*]->(J)-[*]->(u) SET j.mood = '{mood}', j.anxiety = '{anxiety}', j.depression = '{depression}', j.energy = '{energy}' ", mood=mood, journal_title=journal_title, anxiety=anxiety, depression=depression, energy=energy, username=username)
+        graph.run(f"MATCH (j: Journal), (J: JournalMaster), (u: User), (j)-[*]->(J)-[r: link]->(u) WHERE j.name = '{journal_title}' AND u.name = '{username}' SET j.mood = '{mood}', j.anxiety = '{anxiety}', j.depression = '{depression}', j.energy = '{energy}' ", mood=mood, journal_title=journal_title, anxiety=anxiety, depression=depression, energy=energy, username=username)
