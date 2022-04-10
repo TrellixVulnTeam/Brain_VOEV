@@ -141,7 +141,7 @@ def irc_server(graph, log):
                             new_room = Chatroom(f"#{tmp_usr.name}")
                             irc_instance.rooms[f"#{tmp_usr.name}"] = new_room
                             irc_instance.rooms[f"#{tmp_usr.name}"].add_new_client_to_chatroom(tmp_usr.name, tmp_usr.client_socket)
-                            irc_instance.join_room(f"#{tmp_usr.name}", tmp_usr.client_socket, tmp_usr.name)
+
                         else:
                             new_client_socket.send(f"Password incorrect, please try again or contact system administrator".encode())
                             new_client_socket.close()
@@ -178,8 +178,15 @@ def irc_server(graph, log):
                         message_parse(irc_instance, notified_socket, user, message)
    		
     		
-    message_refresher = threading.Thread(target=refresh_messages, args=locals())
-    message_refresher.start()
+    try:
+    	thread=refresh_messages()
+    	thread.daemon=True
+    	thread.start()
+    	while True: 
+    		time.sleep(100)
+    except (KeyboardInterrupt, SystemExit):
+    	Chatrooms.message_broadcast(default_room, SOCKET_LIST[0], server_socket, "Server is closing, bye!")
+    	server_socket.close()  # gracefully exit
 
 
 if __name__ == '__main__':
