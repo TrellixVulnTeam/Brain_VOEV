@@ -10,6 +10,8 @@ from rich.logging import RichHandler
 
 import logging
 
+import sys, errno
+
 
 # Globals
 DEFAULT_ROOM_NAME = '#default'
@@ -46,9 +48,14 @@ def message_broadcast(room, sender_name, sender_socket, message):
         if client_socket != sender_socket:
             try:
                 client_socket.send(f"{room.name}:{sender_name}> {message}".encode())
+            except IOError as io:
+            	if io.errno == errno.EPIPE:
+            		pass
             except Exception as e:
-                log.info('Failed to send message to client')
-                log.info(e)
+            	log.info('Failed to send message to client')
+            	log.info(e)
+                
+                	
 
 
 # The container that has rooms, which have lists of clients

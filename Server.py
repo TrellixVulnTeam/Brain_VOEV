@@ -140,7 +140,9 @@ def irc_server(graph, log):
                             # Add new client to their own room
                             new_room = Chatroom(f"#{tmp_usr.name}")
                             irc_instance.rooms[f"#{tmp_usr.name}"] = new_room
+                            irc_instance.rooms[f"#{tmp_usr.name}"].add_new_client_to_chatroom("Server", server_socket)
                             irc_instance.rooms[f"#{tmp_usr.name}"].add_new_client_to_chatroom(tmp_usr.name, tmp_usr.client_socket)
+                            
 
                         else:
                             new_client_socket.send(f"Password incorrect, please try again or contact system administrator".encode())

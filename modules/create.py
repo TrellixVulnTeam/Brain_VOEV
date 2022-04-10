@@ -1,22 +1,36 @@
-def main(log, graph, journal_title, date_format, username):
+import Chatrooms
+import os
+import sys
+import inspect
 
-    log.info("Let's create a new Journal entry")
 
+def main(log, graph, journal_title, date_format, sender_name, sender_socket, room):
+
+    class send:
+    	def __init__(self, message):
+    		self.room = room
+    		self.sender_name = "Server"
+    		self.sender_socket = list(room.client_list.keys())[0]
+    		Chatrooms.message_broadcast(self.room, self.sender_name, self.sender_socket, message)
+    
+    username = sender_name
+    
+    send("Let's create a new Journal entry")
     is_journal_created_today = graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster) WHERE j.name = '{journal_title}' AND u.name = '{username}' AND (j)-[*]-(J)-[*]-(u) RETURN j.is_journal_created_today ", journal_title=journal_title, username=username).evaluate()
 
 
     if is_journal_created_today == 1:
-        log.info("You have already created a journal today, here it is")
+        send("You have already created a journal today, here it is")
 
         journal_body_title, journal_body = graph.run(f"MATCH (j: Journal), (u: User), (J: JournalMaster) WHERE j.name = '{journal_title}' AND u.name = 'username' AND (j)-[*]->(J)-[*]-(u) RETURN j.name, j.body", journal_title=journal_title).evaluate()
 
-        log.info(journal_body_title)
-        log.info(journal_body)
+        send(journal_body_title)
+        send(journal_body)
 
     elif is_journal_created_today is None:
 
         graph.run(f"MATCH (u: User), (J: JournalMaster) WHERE u.name = '{username}' CREATE (j: Journal)-[r: Journal_of]->(J) SET j.name = '{journal_title}', j.is_journal_created_today = 1", journal_title=journal_title, username=username)
-        log.info("Your title is " + date_format)
+        send("Your title is " + date_format)
 
         # journal = multiline input
         journal =  []
@@ -33,14 +47,14 @@ def main(log, graph, journal_title, date_format, username):
         for item in journal:
             journal_body+=str(item)
 
-            log.info(journal_body)
+            send(journal_body)
 
         graph.run(f"MATCH (u: User), (J: JournalMaster), (j: Journal) WHERE u.name = '{username}' AND j.name = '{journal_title}' AND (j)-[*]->(J)-[*]->(u) SET j.name = '{journal_title}', j.body = '{journal_body}' ", journal_title=journal_title, journal_body=journal_body)
 
         # Get user input for dicts
 
-        log.info("Lets add an update to your day")
-        log.info("On a scale of 1 - 10 how is your;")
+        send("Lets add an update to your day")
+        send("On a scale of 1 - 10 how is your;")
 
         mood = int(input(">> Overall Mood? "))
         anxiety = int(input(">> Anxitey? "))

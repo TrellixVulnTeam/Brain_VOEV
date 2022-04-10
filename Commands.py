@@ -78,6 +78,7 @@ def message_parse(self, sender_socket, sender_name, message):
     
     username = sender_name
     
+    room = self.rooms[f"#{sender_name}"]
 
     graph = connect(log)
     # Case where message is not a command:
@@ -165,11 +166,12 @@ def message_parse(self, sender_socket, sender_name, message):
     # End pre-built commands
     # Template:
     # elif message.split()[0] == "/pm":
+    
 
     elif message.split()[0] == "/view":
         view.main(log, graph, journal_title, username)
     elif message.split()[0] == "/create":
-        create.main(log, graph, journal_title, date_format, username)
+        create.main(log, graph, journal_title, date_format, sender_name, sender_socket, room)
     elif message.split()[0] == "/update":
         update.main(log, graph, journal_title, username)
     elif message.split()[0] == "/tasks":
