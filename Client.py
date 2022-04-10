@@ -98,7 +98,18 @@ def irc_client(username):
                 # Erase the current line, then print the received message
                 log.info('\r')
                 sys.stdout.flush()
-                log.info(message)
+                
+                
+                if message.split()[0] == "return":
+                	log.info(message.split(' ', 1)[1])
+                	log.info(message)
+                	
+                	return_msg = input("Returning> ")
+                	
+                	server_socket.send(return_msg.encode)
+                	
+                else:
+                	log.info(message)
                 
 
             # Handle input from user
