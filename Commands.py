@@ -4,7 +4,6 @@ from modules import update
 from modules import create_task
 from modules import tasks
 from modules import complete_task
-from modules import BrainAPI
 from modules import attach
 from modules import graph_init
 from modules import login
@@ -173,7 +172,7 @@ def message_parse(self, sender_socket, sender_name, message):
     elif message.split()[0] == "/create":
         create.main(log, graph, journal_title, date_format, sender_name, sender_socket, room)
     elif message.split()[0] == "/update":
-        update.main(log, graph, journal_title, username)
+        update.main(log, graph, journal_title, sender_name, sender_socket, room)
     elif message.split()[0] == "/tasks":
         tasks.main(log, graph, username)
     elif message.split()[0] == "/create task":

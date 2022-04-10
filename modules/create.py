@@ -64,10 +64,11 @@ def main(log, graph, journal_title, date_format, sender_name, sender_socket, roo
         send("return "+"Depression?")
         depression = sender_socket.recv(BUFFER_SIZE).decode()
         
-        send(f"\nBody: {journal_body} Mood: {mood} Anxiety: {anxiety} Depression: {depression}")
-        
+        send("return " + "Energy")
         energy = sender_socket.recv(BUFFER_SIZE).decode()
-
+        
+        send(f"\n Body: {journal_body} Mood: {mood} Anxiety: {anxiety} Depression: {depression} Energy: {energy}")
+	
         # Convert dict to string, remove brackets
 
         journal_body = str(journal_body)

@@ -1,5 +1,19 @@
-def main(log, graph, journal_title, username):
+import Chatrooms
 
+
+def main(log, graph, journal_title, sender_name, sender_socket, room):
+
+    BUFFER_SIZE = 2048
+    
+    username = sender_name
+    
+    class send:
+    	def __init__(self, message):
+    		self.room = room
+    		self.server_name = "Server"
+    		self.server_socket = list(room.client_list.keys())[0]
+    		Chatrooms.message_broadcast(self.room, self.server_name, self.server_socket, message)
+    
     # Get mood cursor from database
 
     today  =  graph.run(f"\
@@ -15,26 +29,14 @@ def main(log, graph, journal_title, username):
     journal_body = today["body"]
     journal_name = today["name"]
 
-    log.info("Here is your journal entry for today")
-    log.info(journal_name)
-    log.info(journal_body)
-
-    # Journal = multiline input
-
-    journal2 = []
-
-    journal = today["body"]
-    journal2.append(journal)
-    while True:
-        line = input(">>> ")
-        if line:
-            journal2.append(line)
-        else:
-            break
-    text = '\n'.join(journal)
-
-    journal_body = journal2
-    log.info(journal_body)
+    send("Here is your journal entry for today")
+    send(journal_name + "\n")
+    send(journal_body)
+    
+    
+    send("return "+"Journal body?")
+    journal_body = sender_socket.recv(BUFFER_SIZE).decode()
+    
 
     #
 
@@ -56,11 +58,24 @@ def main(log, graph, journal_title, username):
     energy = flatten(energy)
 
     # Get user input
-
-    mood.append(int(input(">> Overall Mood? ")))
-    anxiety.append(int(input(">> Anxitey? ")))
-    depression.append(int(input(">> Depression? ")))
-    energy.append(int(input(">> Energy? ")))
+    
+    send("Lets add an update to your day")
+    send("On a scale of 1 - 10 how is your;")
+        
+    send("return "+"Mood?")
+    mood = sender_socket.recv(BUFFER_SIZE).decode()
+        
+    send("return "+"Anxiety?")
+    anxiety = sender_socket.recv(BUFFER_SIZE).decode()
+        
+    send("return "+"Depression?")
+    depression = sender_socket.recv(BUFFER_SIZE).decode()
+        
+    send("return " + "Energy")
+    energy = sender_socket.recv(BUFFER_SIZE).decode()
+    
+    send(f"\n Body: {journal_body} Mood: {mood} Anxiety: {anxiety} Depression: {depression} Energy: {energy}")
+    
 
     # Convert dict to string, remove brackets
 
