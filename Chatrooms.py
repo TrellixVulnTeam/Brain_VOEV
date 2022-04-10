@@ -46,7 +46,7 @@ def message_broadcast(room, sender_name, sender_socket, message):
         if client_socket != sender_socket:
             try:
                 client_socket.send(f"{room.name}:{sender_name}> {message}".encode())
-            except e:
+            except Exception as e:
                 log.info('Failed to send message to client')
                 log.info(e)
 
