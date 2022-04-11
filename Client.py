@@ -154,8 +154,8 @@ def irc_client(username):
                 		is_handled = True
                 	else:
                 		(log.info(trimed_msg))
-                except Exception as e:
-                	log.info(e)
+                except:
+                	pass
                 
                 # Handle server requested returns
                 if message.split(' ')[1] == "return":

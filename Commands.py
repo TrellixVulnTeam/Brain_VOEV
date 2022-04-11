@@ -178,7 +178,7 @@ def message_parse(self, sender_socket, sender_name, message):
     elif message.split()[0] == "/create" and message.split()[1] == "task":
         create_task.main(log, graph, journal_title,date_format, hour_min, sender_name, sender_socket, room)
     elif message.split()[0] == "/complete" and message.split()[1] == "task":
-        complete_task.main(log, graph, username)
+        complete_task.main(log, graph, sender_name, sender_socket, room)
     elif message.split()[0] == "/attach":
         attach.main(log, graph, sender_name, sender_socket, room)
     elif message.split()[0] == "/new user":
