@@ -9,6 +9,7 @@ import socket, select, sys, Server  # TODO remove socket since we do not use it 
 
 import getpass
 import json
+import plotext as plt
 
 # Import rich
 
@@ -54,10 +55,23 @@ username = input(">")
 log.info("Password?")
 password = getpass.getpass(f"{username}> ")
 
-# Give the user a prompt for input
-def user_input(username):
-    input(f"{username}> ")
-    sys.stdout.flush()
+def mood_chart(mood_list, anxiety_list, depression_list, energy_list):
+
+	plt.plot(mood_list, color="yellow", label="Overall Mood")
+	plt.plot(anxiety_list, color="green", label="Anxiety")
+	plt.plot(depression_list, color="magenta", label="Depression")
+	plt.plot(energy_list, color="blue", label="Energy")
+	
+	plt.ylim(0, 10)
+	plt.yfrequency(1)
+	plt.plotsize(100, 100)
+	plt.xlabel("Entries")
+	plt.ylabel("Mood")
+	plt.title("Mood")
+	
+	plt.show()
+	
+	input(">> Press Enter to continue")
 
 
 def irc_client(username):
@@ -79,6 +93,9 @@ def irc_client(username):
 
     # Loop to receive and send messages
     while True:
+        
+        is_dict = False
+        
         # Check stdin for messages from the client and check the server socket for messages from the server
         socket_list = [sys.stdin, server_socket]
         read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [])
@@ -97,21 +114,59 @@ def irc_client(username):
                     sys.exit()
                 # Erase the current line, then print the received message
                 
-
+                
+                try:
+                	trimed_msg = message.replace("#Daniel:Server> ", "")
+                	trimed_msg = json.loads(trimed_msg)
+                	
+                	if type(trimed_msg) is dict:
+                		is_dict = True
+                		
+                		dict_cover = trimed_msg
+                		
+                		tracking_list = dict_cover["tracking_list"]
+                		
+                		mood_list = tracking_list["mood_list"]
+                		anxiety_list = tracking_list["anxiety_list"]
+                		depression_list = tracking_list["depression_list"]
+                		energy_list = tracking_list["energy_list"]
+                		
+                		# Convert numbers as strings to ints
+                		mood_list = list(map(int, mood_list))
+                		anxiety_list = list(map(int, anxiety_list))
+                		depression_list = list(map(int, depression_list))
+                		energy_list = list(map(int, energy_list))
+                		
+                		
+                		# Remove None values
+                		mood_list = list(filter(None, mood_list))
+                		anxiety_list = list(filter(None, anxiety_list))
+                		depression_list = list(filter(None, depression_list))
+                		energy_list = list(filter(None, energy_list))
+                		
+                		mood_chart(mood_list, anxiety_list, depression_list, energy_list)          		
+                	
+                		
+                except:
+                	pass
+                
+                
                 if message.split(' ')[1] == "return":
                 
                 	log.info(message.replace(" return",""))
                 	
                 	return_msg = input("Returning> ")
                 	
-                	server_socket.send(return_msg.encode())
-                	
+                	server_socket.send(return_msg.encode())                
+                
                 else:
                 	if message == "#Daniel:Server> ": 
                 		pass
                 	else:
-                		log.info(message)
-                
+                		if is_dict == True:
+                			pass
+                		else:
+                			log.info(message)
 
             # Handle input from user
             else:

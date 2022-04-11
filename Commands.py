@@ -168,7 +168,7 @@ def message_parse(self, sender_socket, sender_name, message):
     
 
     elif message.split()[0] == "/view":
-        view.main(log, graph, journal_title, username)
+        view.main(log, graph, journal_title, sender_name, sender_socket, room)
     elif message.split()[0] == "/create":
         create.main(log, graph, journal_title, date_format, sender_name, sender_socket, room)
     elif message.split()[0] == "/update":
