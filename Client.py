@@ -9,6 +9,7 @@ import socket, select, sys, Server  # TODO remove socket since we do not use it 
 
 import getpass
 import json
+import jsonpickle
 import plotext as plt
 
 # Import rich
@@ -17,6 +18,8 @@ from rich.console import Console
 from rich.theme import Theme
 from rich.traceback import install
 from rich.logging import RichHandler
+from rich.tree import Tree
+from rich import print
 
 import logging
 
@@ -94,7 +97,7 @@ def irc_client(username):
     # Loop to receive and send messages
     while True:
         
-        is_dict = False
+        is_handled = False
         
         # Check stdin for messages from the client and check the server socket for messages from the server
         socket_list = [sys.stdin, server_socket]
@@ -112,15 +115,14 @@ def irc_client(username):
                     server_socket.close()
                     log.info("\rDisconnected from the server")
                     sys.exit()
-                # Erase the current line, then print the received message
                 
-                
+                # Handle mood charts
                 try:
                 	trimed_msg = message.replace("#Daniel:Server> ", "")
-                	trimed_msg = json.loads(trimed_msg)
+                	trimed_msg = jsonpickle.decode(trimed_msg)
                 	
                 	if type(trimed_msg) is dict:
-                		is_dict = True
+                		is_handled = True
                 		
                 		dict_cover = trimed_msg
                 		
@@ -144,13 +146,18 @@ def irc_client(username):
                 		depression_list = list(filter(None, depression_list))
                 		energy_list = list(filter(None, energy_list))
                 		
-                		mood_chart(mood_list, anxiety_list, depression_list, energy_list)          		
+                		mood_chart(mood_list, anxiety_list, depression_list, energy_list)
                 	
-                		
-                except:
-                	pass
+                	# Handle task trees
+                	elif type(trimed_msg) is Tree:
+                		print(trimed_msg)
+                		is_handled = True
+                	else:
+                		(log.info(trimed_msg))
+                except Exception as e:
+                	log.info(e)
                 
-                
+                # Handle server requested returns
                 if message.split(' ')[1] == "return":
                 
                 	log.info(message.replace(" return",""))
@@ -160,14 +167,17 @@ def irc_client(username):
                 	server_socket.send(return_msg.encode())                
                 
                 else:
-                	if message == "#Daniel:Server> ": 
+                	if message == f"#{username}:Server> ": 
                 		pass
                 	else:
-                		if is_dict == True:
+                		if is_handled == True:
                 			pass
                 		else:
+                			# If plain message
                 			log.info(message)
 
+            
+            
             # Handle input from user
             else:
                 message = (input(f"{username}> "))

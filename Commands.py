@@ -169,16 +169,15 @@ def message_parse(self, sender_socket, sender_name, message):
 
     elif message.split()[0] == "/view":
         view.main(log, graph, journal_title, sender_name, sender_socket, room)
-    elif message.split()[0] == "/create":
+    elif message.split()[0] == "/create" and message.split()[1] == None:
         create.main(log, graph, journal_title, date_format, sender_name, sender_socket, room)
     elif message.split()[0] == "/update":
         update.main(log, graph, journal_title, sender_name, sender_socket, room)
     elif message.split()[0] == "/tasks":
-        tasks.main(log, graph, username)
-    elif message.split()[0] == "/create task":
-        create_task.main(log, graph, journal_title,
-                         date_format, hour_min, username)
-    elif message.split()[0] == "/complete task":
+        tasks.main(log, graph, sender_name, sender_socket, room)
+    elif message.split()[0] == "/create" and message.split()[1] == "task":
+        create_task.main(log, graph, journal_title,date_format, hour_min, sender_name, sender_socket, room)
+    elif message.split()[0] == "/complete" and message.split()[1] == "task":
         complete_task.main(log, graph, username)
     elif message.split()[0] == "/attach":
         attach.main(log, graph, username)

@@ -1,6 +1,22 @@
-def main(log, graph, journal_title, date_format, hour_min, username):
+import Chatrooms
 
-    taskname_in = input(">> Task name? ")
+
+def main(log, graph, journal_title, date_format, hour_min, sender_name, sender_socket, room):
+
+    class send:
+    	def __init__(self, message):
+    		self.room = room
+    		self.server_name = "Server"
+    		self.server_socket = list(room.client_list.keys())[0]
+    		Chatrooms.message_broadcast(self.room, self.server_name, self.server_socket, message)
+    
+    username = sender_name
+    
+    BUFFER_SIZE = 2048
+    
+    
+    send("return "+"Task name?")
+    taskname_in = sender_socket.recv(BUFFER_SIZE).decode()
     task_datetime = (f"Task {date_format} {hour_min}")
 
     taskname = taskname_in
@@ -15,5 +31,5 @@ def main(log, graph, journal_title, date_format, hour_min, username):
 
     graph.run(f"MATCH (t: Task), (u: User), (T: TaskMaster) WHERE u.name = '{username}' AND T.name = 'TaskMaster' AND (t)-[*]->(T)-[*]->(u) AND t.name = '{taskname}' SET t.name = '{name2}'", taskname=taskname, username=username, name2=name2)
 
-    log.info(name2)
-    log.info("Task created")
+    send(name2)
+    send("Task created")

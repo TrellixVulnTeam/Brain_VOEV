@@ -2,10 +2,26 @@ import rich
 from rich.tree import Tree
 from rich import print
 
+import json
+import jsonpickle
 
-def main(log, graph, username):
+import Chatrooms
 
-    log.info("Here are your tasks:\n")
+
+def main(log, graph, sender_name, sender_socket, room):
+
+    class send:
+    	def __init__(self, message):
+    		self.room = room
+    		self.server_name = "Server"
+    		self.server_socket = list(room.client_list.keys())[0]
+    		Chatrooms.message_broadcast(self.room, self.server_name, self.server_socket, message)
+    
+    username = sender_name
+    
+    BUFFER_SIZE = 2048
+    
+    send("Here are your tasks:\n")
 
     tasks_in = graph.run("\
                          MATCH (t: Task)\
@@ -50,4 +66,7 @@ def main(log, graph, username):
         if task_branch_name not in task_branch_names:
             task_branch_names[task_branch_name] = task_branch_names[parent_branch_name].add(taskname)
 
-    print(task_tree)
+   	
+   
+    task_tree = jsonpickle.encode(task_tree)
+    send(task_tree)
