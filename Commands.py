@@ -180,6 +180,6 @@ def message_parse(self, sender_socket, sender_name, message):
     elif message.split()[0] == "/complete" and message.split()[1] == "task":
         complete_task.main(log, graph, username)
     elif message.split()[0] == "/attach":
-        attach.main(log, graph, username)
+        attach.main(log, graph, sender_name, sender_socket, room)
     elif message.split()[0] == "/new user":
         new_user.user(log, graph)
