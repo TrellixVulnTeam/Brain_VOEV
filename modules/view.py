@@ -2,6 +2,14 @@ import json
 import Chatrooms
 
 
+def to_int(x, y):
+	for i in x:
+		if i == "," or i == " ":
+			pass
+		else:
+			new_i = int(i)
+			y.append(new_i)
+
 def main(log, graph, journal_title, sender_name, sender_socket, room):
 
     BUFFER_SIZE = 2048
@@ -30,19 +38,24 @@ def main(log, graph, journal_title, sender_name, sender_socket, room):
 
     mood_list = []
     while mood_in.forward():
-        mood_list.append(mood_in.current[0])
-
+        mood_out = (mood_in.current[0])
+        to_int(mood_out, mood_list)
+        
     anxiety_list = []
     while anxiety_in.forward():
-        anxiety_list.append(anxiety_in.current[0])
-
+        anxiety_out = (anxiety_in.current[0])
+        to_int(anxiety_out, anxiety_list)
+                
     depression_list = []
     while depression_in.forward():
-        depression_list.append(depression_in.current[0])
-
+        depression_out = (depression_in.current[0])
+        to_int(depression_out, depression_list)
+        
     energy_list = []
     while energy_in.forward():
-        energy_list.append(energy_in.current[0])
+    	energy_out = (energy_in.current[0])
+    	to_int(energy_out, energy_list)
+    	
 
     tracking_list = {}
     dict_cover = {}
