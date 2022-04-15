@@ -1,6 +1,7 @@
 django
 django-channels
 django_neomodel
+jsonpickle
 Textualize
 logger
 plotext

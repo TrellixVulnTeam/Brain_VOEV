@@ -118,7 +118,7 @@ def irc_client(username):
                 
                 # Handle mood charts
                 try:
-                	trimed_msg = message.replace("#Daniel:Server> ", "")
+                	trimed_msg = message.replace(f"#{username}:Server> ", "")
                 	trimed_msg = jsonpickle.decode(trimed_msg)
                 	
                 	if type(trimed_msg) is dict:

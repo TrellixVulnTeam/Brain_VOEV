@@ -76,33 +76,18 @@ def main(log, graph, journal_title, date_format, sender_name, sender_socket, roo
         
         send(f"\n Journal Title: {journal_title}\n Body: {journal_body}\n Mood: {mood}\n Anxiety: {anxiety}\n Depression: {depression}\n Energy: {energy}")
 	
-        # Convert dict to string, remove brackets
-
-        journal_body = str(journal_body)
-        journal_body = journal_body.replace('[', '')
-        journal_body = journal_body.replace(']', '')
-        journal_body = journal_body.replace("'", '')
-
-        anxiety = str(anxiety)
-        anxiety = anxiety.replace('[', '')
-        anxiety = anxiety.replace(']', '')
-        anxiety = anxiety.replace("'", '')
-
-        mood = str(mood)
-        mood = mood.replace('[', '')
-        mood = mood.replace(']', '')
-        mood = mood.replace("'", '')
-
-        depression = str(depression)
-        depression = depression.replace('[', '')
-        depression = depression.replace(']', '')
-        depression = depression.replace("'", '')
-
-        energy = str(energy)
-        energy = energy.replace('[', '')
-        energy = energy.replace(']', '')
-        energy = energy.replace("'", '')
-
+       
         # Send changes to database
 
-        graph.run(f"MATCH (j: Journal), (J: JournalMaster), (u: User), (j)-[*]->(J)-[r: link]->(u) WHERE j.name = '{journal_title}' AND u.name = '{username}' SET j.mood = '{mood}', j.anxiety = '{anxiety}', j.depression = '{depression}', j.energy = '{energy}' ", mood=mood, journal_title=journal_title, anxiety=anxiety, depression=depression, energy=energy, username=username)
+        graph.run(f"\
+        MATCH (j: Journal),\
+        (J: JournalMaster),\
+        (u: User),\
+        (j)-[*]->(J)-[r: link]->(u)\
+        WHERE j.name = '{journal_title}'\
+        AND u.name = '{username}'\
+        SET j.mood = '{mood}',\
+        j.anxiety = '{anxiety}',\
+        j.depression = '{depression}',\
+        j.energy = '{energy}'\
+        ", mood=mood, journal_title=journal_title, anxiety=anxiety, depression=depression, energy=energy, username=username)

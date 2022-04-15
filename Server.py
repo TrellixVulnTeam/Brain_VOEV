@@ -23,7 +23,7 @@ from py2neo import Graph
 from Commands import message_parse
 
 from modules import User
-
+from modules import graph_init
 
 def rich_init():
 
@@ -48,25 +48,6 @@ def rich_init():
 
 # Rich Init
 rich_init()
-
-def connect(log):
-
-    uri = "bolt://localhost:7687"
-    user = "neo4j"
-    graph_password = os.getenv('BrainDBPassword')
-    try:
-        graph = Graph(uri, auth=(user, graph_password))
-    except:
-        log.info("No Database Found\n")
-        log.info("Start Database and press press any key to continue\n")
-        input()
-        
-    return graph
-        
-        
-# Graph init
-    
-connect(log)
 
 
 # Globals
@@ -193,5 +174,5 @@ def irc_server(graph, log):
 
 if __name__ == '__main__':
     log = rich_init()
-    graph = connect(log)
+    graph = graph_init.main(log)
     irc_server(graph, log)

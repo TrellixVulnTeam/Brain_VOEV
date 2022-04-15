@@ -52,7 +52,7 @@ rich_init()
 
 def connect(log):
 
-    uri = "bolt://localhost:7687"
+    uri = "bolt://localhost:7688"
     user = "neo4j"
     graph_password = os.getenv('BrainDBPassword')
 
@@ -82,6 +82,16 @@ def message_parse(self, sender_socket, sender_name, message):
     graph = connect(log)
     # Case where message is not a command:
     # The message is sent to the default channel
+    
+    multi_message = False
+
+    try:
+        message.split()[1]
+        multi_message = True
+    except:
+        pass
+        
+        
     if message[0] != '/':
         message_broadcast(self.rooms[DEFAULT_ROOM_NAME],
                           sender_name, sender_socket, message)
@@ -165,19 +175,19 @@ def message_parse(self, sender_socket, sender_name, message):
     # End pre-built commands
     # Template:
     # elif message.split()[0] == "/pm":
-    
+
 
     elif message.split()[0] == "/view":
         view.main(log, graph, journal_title, sender_name, sender_socket, room)
-    elif message.split()[0] == "/create" and message.split()[1] == None:
+    elif message.split()[0] == "/create" and multi_message == False:
         create.main(log, graph, journal_title, date_format, sender_name, sender_socket, room)
     elif message.split()[0] == "/update":
         update.main(log, graph, journal_title, sender_name, sender_socket, room)
     elif message.split()[0] == "/tasks":
         tasks.main(log, graph, sender_name, sender_socket, room)
-    elif message.split()[0] == "/create" and message.split()[1] == "task":
+    elif message.split()[0] == "/create" and milti_message == True and message.split()[1] == "task":
         create_task.main(log, graph, journal_title,date_format, hour_min, sender_name, sender_socket, room)
-    elif message.split()[0] == "/complete" and message.split()[1] == "task":
+    elif message.split()[0] == "/complete" and multi_message == True and message.split()[1] == "task":
         complete_task.main(log, graph, sender_name, sender_socket, room)
     elif message.split()[0] == "/attach":
         attach.main(log, graph, sender_name, sender_socket, room)

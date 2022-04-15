@@ -7,7 +7,7 @@ from modules import login
 
 def connect(log):
 
-    uri = "bolt://localhost:7687"
+    uri = "bolt://localhost:7688"
     user = "neo4j"
     password = os.getenv('BrainDBPassword')
     try:
@@ -43,10 +43,9 @@ def system_init(log, graph):
     else:
         pass
 
-    username = login.main(log, graph)
-    return username
+    login.main(log, graph)
 
 def main(log):
     graph = connect(log)
-    username = system_init(log, graph)
-    return username, graph
+    system_init(log, graph)
+    return graph
