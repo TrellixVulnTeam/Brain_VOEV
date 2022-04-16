@@ -1,62 +1,30 @@
-"""
-CS 494P Project
-IRC - Client Application
-"""
-
-
-import socket, select, sys, Server  # TODO remove socket since we do not use it here either
-# from Server import BUFFER_SIZE TODO remove since we likely do not need this
+import socket, select, sys, Server
 
 import getpass
 import json
 import jsonpickle
 import plotext as plt
 
-# Import rich
 
-from rich.console import Console
-from rich.theme import Theme
-from rich.traceback import install
-from rich.logging import RichHandler
-from rich.tree import Tree
-from rich import print
-
-import logging
-
-# Define the host IP and port for the server
-HOST = socket.gethostname()
-PORT = 5050
+def main():
+	
+	# Define the host IP and port for the server
+	HOST = socket.gethostname()
+	PORT = 5050
 
 
-def rich_init():
+	# Ask For initial username and password
 
-    install(show_locals=True)
+	return ("Username?")
+	username = input(">")
 
-    global console
-    console = Console(record=True)
-    custom_theme = Theme({"1": "red"})
-    console = Console(theme=custom_theme)
+	return ("Password?")
+	password = getpass.getpass(f"{username}> ")
+	
+	returned = irc_client()
+	
+	return returned
 
-    logging.basicConfig(
-        level="INFO",
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler(rich_tracebacks=True)]
-    )
-
-    global log
-    log = logging.getLogger("rich")
-
-# Rich Init
-rich_init()
-
-# Ask For initial username and password
-
-log.info("Username?")
-username = input(">")
-
-log.info("Password?")
-password = getpass.getpass(f"{username}> ")
 
 def mood_chart(mood_list, anxiety_list, depression_list, energy_list):
 
@@ -77,7 +45,7 @@ def mood_chart(mood_list, anxiety_list, depression_list, energy_list):
 	input(">> Press Enter to continue")
 
 
-def irc_client(username):
+def irc_client(*args):
     # Get the host IP and port for the server
     host = socket.gethostname()
     port = 5050
@@ -85,7 +53,7 @@ def irc_client(username):
     # Create the server socket and connect to the server
     server_socket = socket.socket()
     server_socket.connect((host, port))
-    log.info(f"Connected to server at {host}:{port}")
+    return (f"Connected to server at {host}:{port}")
 
     # Send initial message to server with username and pass
     
@@ -113,7 +81,7 @@ def irc_client(username):
                 if not message:
                     server_socket.shutdown(2)
                     server_socket.close()
-                    log.info("\rDisconnected from the server")
+                    return ("\rDisconnected from the server")
                     sys.exit()
                 
                 # Handle mood charts
@@ -153,14 +121,14 @@ def irc_client(username):
                 		print(trimed_msg)
                 		is_handled = True
                 	else:
-                		(log.info(trimed_msg))
+                		return (trimed_msg)
                 except:
                 	pass
                 
                 # Handle server requested returns
                 if message.split(' ')[1] == "return":
                 
-                	log.info(message.replace(" return",""))
+                	return (message.replace(" return",""))
                 	
                 	return_msg = input("Returning> ")
                 	
@@ -174,7 +142,7 @@ def irc_client(username):
                 			pass
                 		else:
                 			# If plain message
-                			log.info(message)
+                			return (message)
 
             
             
@@ -185,28 +153,3 @@ def irc_client(username):
                 
 
     server_socket.close()   # close connection
-
-
-if __name__ == "__main__":
-    irc_client(username)
-
-class Client:
-    def __init__(self, name, host, port, server_socket):
-        self.name = name
-        self.host = host
-        self.port = port
-        self.server_socket = server_socket
-    
-    @classmethod
-    def from_input(cls, server_socket):
-        return( HOST,
-                PORT,
-                server_socket)
-
-    # Give the user a prompt for input
-    def user_input(self):
-        input()
-        sys.stdout.flush()
-    
-    def io_loop(self):
-        ...
